@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Tag / Pin badge base -->
+    <path
+        android:fillColor="#5EEAD4"
+        android:pathData="M54,26 C43.5,26 35,34.5 35,45 C35,58.5 51.5,73 53.2,74.5 C53.7,74.9 54.3,74.9 54.8,74.5 C56.5,73 73,58.5 73,45 C73,34.5 64.5,26 54,26 Z" />
+
+    <!-- Center cutout / hole in tag -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M54,42 C51.8,42 50,40.2 50,38 C50,35.8 51.8,34 54,34 C56.2,34 58,35.8 58,38 C58,40.2 56.2,42 54,42 Z" />
+
+    <!-- Magnifying Glass overlaying with handle -->
+    <!-- Handle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M66.5,66.5 L78,78 C79.2,79.2 81.1,79.2 82.3,78 C83.5,76.8 83.5,74.9 82.3,73.7 L70.8,62.2 Z" />
+
+    <!-- Lens Rim -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:pathData="M52,50m-20,0a20,20 0 1,1 40,0a20,20 0 1,1 -40,0" />
+
+    <!-- Checkmark inside lens representing Found -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M44,50 L49,55 L60,44" />
+
+    <!-- Sparkle dot top right -->
+    <path
+        android:fillColor="#FDE047"
+        android:pathData="M76,30 L77.5,33.5 L81,35 L77.5,36.5 L76,40 L74.5,36.5 L71,35 L74.5,33.5 Z" />
+</vector>

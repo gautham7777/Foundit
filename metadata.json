@@ -1,0 +1,6 @@
+{
+  "name": "FoundIt",
+  "description": "Local community Lost and Found utility to report found items and discover lost belongings nearby.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
