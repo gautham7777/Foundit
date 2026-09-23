@@ -1,0 +1,9 @@
+{
+  "name": "foundit-web",
+  "version": "1.0.0",
+  "description": "FoundIt - Community Lost & Found Web App deployable on Vercel",
+  "scripts": {
+    "build": "echo 'FoundIt Web is ready to deploy'",
+    "start": "serve public"
+  }
+}
