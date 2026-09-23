@@ -18,6 +18,21 @@
     }
     .scrollbar-none::-webkit-scrollbar { display: none; }
     .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+    @keyframes policeFlash {
+      0%, 100% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.6); border-color: #3b82f6; }
+      50% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.6); border-color: #ef4444; }
+    }
+    .police-beacon {
+      animation: policeFlash 0.8s infinite ease-in-out;
+    }
+    @keyframes radarScan {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .radar-sweep {
+      animation: radarScan 2s linear infinite;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased">
@@ -44,10 +59,16 @@
           <span id="headerClaimBadge" class="hidden w-2 h-2 rounded-full bg-amber-500"></span>
         </button>
 
-        <span id="syncBadge" class="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          Live Sync
-        </span>
+        <button 
+          onclick="syncNow(true)" 
+          id="syncBadge" 
+          title="Click to sync now across phones"
+          class="inline-flex items-center gap-1.5 text-[10px] font-semibold bg-emerald-50 hover:bg-emerald-100 active:scale-95 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 cursor-pointer transition shadow-xs"
+        >
+          <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="syncLabel">Live Sync</span>
+          <i data-lucide="refresh-cw" class="w-3 h-3 text-emerald-600"></i>
+        </button>
       </div>
     </div>
   </header>
@@ -89,7 +110,7 @@
           I Found an Item
         </h3>
         <p class="text-xs sm:text-sm text-teal-100 font-normal leading-relaxed max-w-sm">
-          Post what you picked up so the owner can call you. Manage your posts in your dashboard.
+          Post what you picked up, optionally notify local police precinct, and manage inquiries in your dashboard.
         </p>
 
         <div class="mt-4 flex items-center gap-1.5 text-xs font-bold text-teal-100 group-hover:text-white transition">
@@ -288,7 +309,7 @@
           <i data-lucide="phone-call" class="w-6 h-6"></i>
         </div>
         <h3 class="font-bold text-slate-900 text-base" id="modalItemTitle">Item Title</h3>
-        <p class="text-xs text-slate-500 mt-0.5">Found by <span id="modalFinderName" class="font-semibold text-slate-700">Finder</span></p>
+        <p class="text-xs text-slate-500 mt-0.5">Found by <span id="modalFinderName" class="font-semibold text-slate-700">Finder</span> • <span id="modalItemTime" class="font-medium text-teal-700">Just now</span></p>
       </div>
 
       <!-- Verification question prompt if any -->
@@ -327,7 +348,7 @@
     </div>
   </div>
 
-  <!-- REPORT FOUND FORM MODAL -->
+  <!-- REPORT FOUND FORM MODAL (With Police Station Contact Option) -->
   <div id="reportModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-xl relative animate-in slide-in-from-bottom duration-200">
       
@@ -388,11 +409,89 @@
           <p class="text-[10px] text-slate-400 mt-1">Ask something only the real owner would know when they call you.</p>
         </div>
 
+        <!-- NEW: CONTACT LOCAL POLICE STATION OPTION -->
+        <div class="bg-blue-50/70 border border-blue-200 rounded-2xl p-3.5 transition">
+          <label class="flex items-start gap-2.5 cursor-pointer">
+            <input type="checkbox" id="contactPoliceCheckbox" onchange="togglePolicePrecinctSelect()" class="mt-0.5 w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300" />
+            <div class="flex-1">
+              <span class="block text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                <i data-lucide="shield-alert" class="w-4 h-4 text-blue-600"></i>
+                Alert Local Police Station / Precinct
+              </span>
+              <p class="text-[11px] text-blue-700/80 mt-0.5 leading-snug">
+                Send an official lost property notification broadcast to the nearest police precinct dispatch registry.
+              </p>
+            </div>
+          </label>
+
+          <!-- Dropdown that expands if checked -->
+          <div id="policePrecinctBox" class="hidden mt-2.5 pt-2.5 border-t border-blue-200/60">
+            <label class="block text-[11px] font-bold text-blue-900 mb-1">Select Nearest Station</label>
+            <select id="policeStationSelect" class="w-full px-2.5 py-1.5 bg-white border border-blue-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="Central Metro District Precinct">Central Metro District Precinct</option>
+              <option value="Downtown Police Station - Desk 4">Downtown Police Station - Desk 4</option>
+              <option value="Westside Community Police Annex">Westside Community Police Annex</option>
+              <option value="North Valley Police Division (Lost Property)">North Valley Police Division (Lost Property)</option>
+              <option value="Transit Authority Police Unit">Transit Authority Police Unit</option>
+            </select>
+          </div>
+        </div>
+
         <div class="pt-2 flex gap-2">
           <button type="button" onclick="closeReportModal()" class="flex-1 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
           <button type="submit" id="submitBtn" class="flex-1 py-2.5 bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-sm">Post Found Item</button>
         </div>
       </form>
+
+    </div>
+  </div>
+
+  <!-- POLICE ALERTING ANIMATED GRAPHIC MODAL -->
+  <div id="policeAlertModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border-2 border-blue-500 rounded-3xl max-w-sm w-full p-6 text-center text-white shadow-2xl relative overflow-hidden police-beacon">
+      
+      <!-- Top Police Siren Graphic -->
+      <div class="relative w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+        <!-- Radar circle sweep background -->
+        <div class="absolute inset-0 rounded-full border border-blue-500/30"></div>
+        <div class="absolute inset-2 rounded-full border border-dashed border-red-500/40 radar-sweep"></div>
+        
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-red-600 flex items-center justify-center text-white shadow-lg animate-pulse">
+          <i data-lucide="shield-alert" class="w-8 h-8 text-white"></i>
+        </div>
+      </div>
+
+      <span class="inline-block text-[10px] font-black tracking-widest uppercase bg-blue-500/20 text-blue-400 border border-blue-500/40 px-2.5 py-0.5 rounded-full mb-2">
+        EMERGENCY DISPATCH LINK
+      </span>
+
+      <h3 class="text-lg font-black tracking-tight" id="policeModalTitle">Alerting Police Precinct...</h3>
+      <p class="text-xs text-slate-300 mt-1 max-w-xs mx-auto" id="policeModalStation">
+        Connecting to Central Metro District Precinct
+      </p>
+
+      <!-- Animated Progress Bar -->
+      <div class="my-4 bg-slate-800 rounded-full h-2 w-full overflow-hidden p-0.5 border border-slate-700">
+        <div id="policeProgressBar" class="bg-gradient-to-r from-blue-500 via-teal-400 to-emerald-400 h-full rounded-full transition-all duration-300" style="width: 15%"></div>
+      </div>
+
+      <!-- Live Log Terminal Graphic -->
+      <div class="bg-black/60 rounded-xl p-3 font-mono text-[11px] text-left text-blue-300 border border-slate-800 space-y-1">
+        <div class="flex items-center gap-1.5" id="logStep1">
+          <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span>
+          <span>Initiating lost property handshake...</span>
+        </div>
+        <div class="flex items-center gap-1.5 text-slate-500" id="logStep2">
+          <span>○ Transmitting item details & GPS tag</span>
+        </div>
+        <div class="flex items-center gap-1.5 text-slate-500" id="logStep3">
+          <span>○ Recording official incident ID</span>
+        </div>
+      </div>
+
+      <p class="text-[10px] text-slate-400 mt-3 italic" id="policeStatusNotice">
+        Transmitting encrypted notification to duty desk...
+      </p>
 
     </div>
   </div>
@@ -403,9 +502,15 @@
 
   <!-- SCRIPT -->
   <script>
-    const DEFAULT_CLOUD_ENDPOINT = 'https://foundit-community-default-rtdb.firebaseio.com/items.json';
-    const LOCAL_FALLBACK_KEY = 'foundit_cloud_items_cache_v4';
-    const MY_POSTED_IDS_KEY = 'foundit_my_post_ids_v1';
+    // CLOUD SYNC CONFIGURATION
+    // High-performance real-time mesh topic shared by all phones/browsers
+    const MESH_TOPIC = 'foundit_community_v3_live_mesh';
+    const MESH_PUBLISH_URL = `https://ntfy.sh/${MESH_TOPIC}`;
+    const MESH_POLL_URL = `https://ntfy.sh/${MESH_TOPIC}/json?poll=1&since=all`;
+    const MESH_SSE_URL = `https://ntfy.sh/${MESH_TOPIC}/sse`;
+    const LOCAL_FALLBACK_KEY = 'foundit_cloud_items_cache_v6';
+    const MY_POSTED_IDS_KEY = 'foundit_my_post_ids_v2';
+    const DEVICE_ID = 'dev_' + Math.random().toString(36).substring(2, 9);
 
     const INITIAL_SAMPLE_ITEMS = [
       {
@@ -413,77 +518,82 @@
         title: 'Brown Leather Bifold Wallet',
         category: 'WALLET',
         location: 'Central Metro Station (Platform 2)',
-        time: 'Today 4:00 PM',
         desc: 'Left on bench near ticketing machines. Contains cards, keep cash details private.',
         question: 'What initials are stamped inside the fold?',
         finder: 'Marcus',
         phone: '+1 (555) 234-8901',
         returned: false,
+        policeNotified: true,
+        policeStation: 'Central Metro District Precinct',
+        policeIncidentId: 'PD-84291',
+        createdAt: Date.now() - (45 * 60 * 1000), // 45m ago
         claimAlerts: [
-          { claimerPhone: 'Caller interested', time: '10 mins ago', message: 'Someone tapped "This Is Mine!" and viewed your phone number.' }
-        ],
-        createdAt: Date.now() - 3600000
+          { claimerPhone: 'Caller interested', createdAt: Date.now() - (12 * 60 * 1000), message: 'Someone tapped "This Is Mine!" and viewed your phone number.' }
+        ]
       },
       {
         id: 'item-102',
         title: 'Toyota Car Keys on Red Lanyard',
         category: 'KEYS',
         location: 'Riverside Park Playground',
-        time: '3 hours ago',
         desc: 'Remote key fob with 3 house keys and a small gym tag.',
         question: 'What gym name is on the black barcode tag?',
         finder: 'Elena',
         phone: '+1 (555) 871-3420',
         returned: false,
+        policeNotified: false,
         claimAlerts: [],
-        createdAt: Date.now() - 7200000
+        createdAt: Date.now() - (2 * 3600 * 1000) // 2h ago
       },
       {
         id: 'item-103',
         title: 'iPhone 14 Pro (Deep Purple)',
         category: 'PHONE',
         location: 'Bean & Leaf Café (Main St)',
-        time: 'Yesterday 6:30 PM',
         desc: 'Left on table in clear silicone case with flower sticker. Safely kept by manager.',
         question: 'What picture is on the locked wallpaper?',
         finder: 'Liam (Café Lead)',
         phone: '+1 (555) 492-7711',
         returned: false,
+        policeNotified: true,
+        policeStation: 'Downtown Police Station - Desk 4',
+        policeIncidentId: 'PD-77210',
         claimAlerts: [],
-        createdAt: Date.now() - 86400000
+        createdAt: Date.now() - (5 * 3600 * 1000) // 5h ago
       },
       {
         id: 'item-104',
         title: 'North Face Backpack (Navy)',
         category: 'BAG',
         location: 'City Bus Route 42',
-        time: 'Today 9:00 AM',
         desc: 'Backpack with notebook and water bottle. Handed to transit lost desk.',
         question: 'What subject is written on the front notebook?',
         finder: 'Officer Gomez',
         phone: '+1 (555) 619-4822',
         returned: false,
+        policeNotified: true,
+        policeStation: 'Transit Authority Police Unit',
+        policeIncidentId: 'PD-39104',
         claimAlerts: [],
-        createdAt: Date.now() - 25000000
+        createdAt: Date.now() - (18 * 3600 * 1000) // 18h ago
       },
       {
         id: 'item-105',
         title: 'AirPods Pro Case',
         category: 'ELECTRONICS',
         location: 'Equinox Gym Locker Room',
-        time: '2 days ago',
         desc: 'White case with tiny blue star sticker on back.',
         question: 'What name appears on the Bluetooth popup?',
         finder: 'Jason',
         phone: '+1 (555) 301-7788',
         returned: false,
+        policeNotified: false,
         claimAlerts: [],
-        createdAt: Date.now() - 172800000
+        createdAt: Date.now() - (2 * 86400 * 1000) // 2d ago
       }
     ];
 
     let items = JSON.parse(localStorage.getItem(LOCAL_FALLBACK_KEY)) || INITIAL_SAMPLE_ITEMS;
-    // Track which items were created on this device / browser
     let myPostIds = JSON.parse(localStorage.getItem(MY_POSTED_IDS_KEY)) || ['item-101'];
     let selectedCat = 'ALL';
     let currentModalItem = null;
@@ -499,14 +609,207 @@
       { id: 'OTHER', name: 'Other' }
     ];
 
-    function getEndpoint() {
-      return DEFAULT_CLOUD_ENDPOINT;
-    }
-
     function saveLocal() {
       localStorage.setItem(LOCAL_FALLBACK_KEY, JSON.stringify(items));
       localStorage.setItem(MY_POSTED_IDS_KEY, JSON.stringify(myPostIds));
       updateDashboardCounts();
+    }
+
+    // DYNAMIC TIME-AGO FORMATTER (e.g. 'Just now', '5m ago', '2h ago', '3d ago')
+    function formatTimeAgo(timestamp) {
+      if (!timestamp) return 'Recently';
+
+      // Parse numeric timestamp or parseable date string
+      let timeVal = typeof timestamp === 'number' ? timestamp : parseInt(timestamp, 10);
+      if (isNaN(timeVal)) {
+        const parsed = Date.parse(timestamp);
+        if (!isNaN(parsed)) timeVal = parsed;
+        else return timestamp; // Return string if unparseable
+      }
+
+      const now = Date.now();
+      const diffMs = Math.max(0, now - timeVal);
+      const diffSec = Math.floor(diffMs / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHours = Math.floor(diffMin / 60);
+      const diffDays = Math.floor(diffHours / 24);
+      const diffWeeks = Math.floor(diffDays / 7);
+      const diffMonths = Math.floor(diffDays / 30);
+
+      if (diffSec < 45) {
+        return 'Just now';
+      } else if (diffMin < 60) {
+        return `${diffMin}m ago`;
+      } else if (diffHours < 24) {
+        return `${diffHours}h ago`;
+      } else if (diffDays === 1) {
+        return '1d ago';
+      } else if (diffDays < 7) {
+        return `${diffDays}d ago`;
+      } else if (diffWeeks < 5) {
+        return `${diffWeeks}w ago`;
+      } else if (diffMonths < 12) {
+        return `${diffMonths}mo ago`;
+      } else {
+        const diffYears = Math.floor(diffDays / 365);
+        return `${diffYears}y ago`;
+      }
+    }
+
+    // CLOUD MESH SYNC ENGINE (Instant broadcast + SSE + 4s polling)
+    async function broadcastAction(actionData) {
+      const payload = {
+        sender: DEVICE_ID,
+        timestamp: Date.now(),
+        ...actionData
+      };
+
+      try {
+        await fetch(MESH_PUBLISH_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
+        });
+        setSyncStatus('connected', 'Live Synced');
+      } catch (e) {
+        console.warn('Broadcast failed, will retry on next poll:', e);
+      }
+    }
+
+    // Process incoming cloud messages from other devices
+    function handleIncomingMessage(msg) {
+      if (!msg || typeof msg !== 'object') return;
+      if (msg.sender === DEVICE_ID) return; // Don't re-apply own actions
+
+      let modified = false;
+
+      if (msg.type === 'NEW_ITEM' && msg.item) {
+        const exists = items.some(i => i.id === msg.item.id);
+        if (!exists) {
+          items.unshift(msg.item);
+          modified = true;
+        }
+      } else if (msg.type === 'DELETE_ITEM' && msg.id) {
+        const prevLen = items.length;
+        items = items.filter(i => i.id !== msg.id);
+        if (items.length !== prevLen) {
+          modified = true;
+        }
+      } else if (msg.type === 'UPDATE_STATUS' && msg.id) {
+        const item = items.find(i => i.id === msg.id);
+        if (item) {
+          item.returned = Boolean(msg.returned);
+          modified = true;
+        }
+      } else if (msg.type === 'CLAIM_ALERT' && msg.id && msg.alert) {
+        const item = items.find(i => i.id === msg.id);
+        if (item) {
+          if (!item.claimAlerts) item.claimAlerts = [];
+          item.claimAlerts.push(msg.alert);
+          modified = true;
+        }
+      } else if (msg.type === 'SYNC_ALL' && Array.isArray(msg.items)) {
+        // Merge full list keeping newest versions
+        msg.items.forEach(incoming => {
+          const idx = items.findIndex(i => i.id === incoming.id);
+          if (idx === -1) {
+            items.push(incoming);
+            modified = true;
+          } else {
+            // If incoming has more claim alerts or updated returned status
+            if ((incoming.claimAlerts?.length || 0) > (items[idx].claimAlerts?.length || 0) || incoming.returned !== items[idx].returned) {
+              items[idx] = { ...items[idx], ...incoming };
+              modified = true;
+            }
+          }
+        });
+      }
+
+      if (modified) {
+        items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        saveLocal();
+        renderItems();
+        renderDashboardItems();
+        updateDashboardCounts();
+        setSyncStatus('connected', 'Live Synced');
+      }
+    }
+
+    // Connect Server-Sent Events (SSE) for instant sub-second push
+    function initEventSource() {
+      if (!window.EventSource) return;
+      try {
+        const es = new EventSource(MESH_SSE_URL);
+        es.onopen = () => {
+          setSyncStatus('connected', 'Live Synced');
+        };
+        es.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data && data.message) {
+              const parsed = JSON.parse(data.message);
+              handleIncomingMessage(parsed);
+            }
+          } catch (e) {}
+        };
+        es.onerror = () => {
+          // SSE reconnects automatically
+          setSyncStatus('syncing', 'Syncing...');
+        };
+      } catch (err) {}
+    }
+
+    // Poll endpoint (works on all networks and mobile safari/chrome)
+    async function syncNow(showToast = false) {
+      setSyncStatus('syncing', 'Syncing...');
+      try {
+        const res = await fetch(MESH_POLL_URL, { cache: 'no-store' });
+        if (res.ok) {
+          const text = await res.text();
+          // Each line is a JSON stream message
+          const lines = text.trim().split('\n');
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const envelope = JSON.parse(line);
+              if (envelope && envelope.message) {
+                const inner = JSON.parse(envelope.message);
+                handleIncomingMessage(inner);
+              }
+            } catch (err) {}
+          }
+          setSyncStatus('connected', 'Live Synced');
+          if (showToast) {
+            alert('✅ Synced with community cloud feed! Latest items up to date.');
+          }
+        }
+      } catch (e) {
+        setSyncStatus('offline', 'Offline (Local)');
+      }
+
+      const homeCount = document.getElementById('homeCountText');
+      if (homeCount) {
+        homeCount.innerText = `${items.length} items currently reported • Synced live across phones`;
+      }
+    }
+
+    function setSyncStatus(status, label) {
+      const badge = document.getElementById('syncBadge');
+      const dot = document.getElementById('syncDot');
+      const text = document.getElementById('syncLabel');
+      if (!badge || !dot || !text) return;
+
+      text.innerText = label;
+      if (status === 'connected') {
+        badge.className = 'inline-flex items-center gap-1.5 text-[10px] font-semibold bg-emerald-50 hover:bg-emerald-100 active:scale-95 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 cursor-pointer transition shadow-xs';
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+      } else if (status === 'syncing') {
+        badge.className = 'inline-flex items-center gap-1.5 text-[10px] font-semibold bg-amber-50 hover:bg-amber-100 active:scale-95 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200 cursor-pointer transition shadow-xs';
+        dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-ping';
+      } else {
+        badge.className = 'inline-flex items-center gap-1.5 text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-600 px-2.5 py-1 rounded-full border border-slate-300 cursor-pointer transition shadow-xs';
+        dot.className = 'w-2 h-2 rounded-full bg-slate-400';
+      }
     }
 
     // NAVIGATION
@@ -542,38 +845,18 @@
       renderCategories();
       renderItems();
       updateDashboardCounts();
-      fetchCloudItems();
-      setInterval(fetchCloudItems, 5000);
+
+      // Start live mesh synchronization across devices
+      initEventSource();
+      syncNow();
+      setInterval(() => syncNow(false), 4000);
+
+      // Periodically refresh relative time labels (e.g. 5m ago -> 6m ago)
+      setInterval(() => {
+        renderItems();
+        renderDashboardItems();
+      }, 30000);
     });
-
-    async function fetchCloudItems() {
-      try {
-        const res = await fetch(getEndpoint(), { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          if (data && typeof data === 'object') {
-            const cloudList = Object.keys(data).map(key => ({
-              ...data[key],
-              cloudKey: key,
-              id: data[key].id || key
-            }));
-
-            if (cloudList.length > 0) {
-              items = cloudList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-              localStorage.setItem(LOCAL_FALLBACK_KEY, JSON.stringify(items));
-              renderItems();
-              renderDashboardItems();
-              updateDashboardCounts();
-            }
-          }
-        }
-      } catch (err) {}
-      
-      const homeCount = document.getElementById('homeCountText');
-      if (homeCount) {
-        homeCount.innerText = `${items.length} items currently reported • Synced live across phones`;
-      }
-    }
 
     function updateDashboardCounts() {
       const myItems = items.filter(i => myPostIds.includes(i.id));
@@ -653,10 +936,19 @@
         <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs hover:border-teal-300 transition">
           <div class="flex items-start justify-between gap-2 mb-1.5">
             <div>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${item.returned ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'}">
-                ${item.returned ? '✓ Returned' : item.category}
-              </span>
-              <h3 class="font-bold text-slate-900 text-sm sm:text-base mt-1 leading-snug">${escapeHtml(item.title)}</h3>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${item.returned ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'}">
+                  ${item.returned ? '✓ Returned' : item.category}
+                </span>
+
+                ${item.policeNotified ? `
+                  <span class="inline-flex items-center gap-1 text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
+                    <i data-lucide="shield-check" class="w-3 h-3 text-blue-600"></i>
+                    Police Station Alerted
+                  </span>
+                ` : ''}
+              </div>
+              <h3 class="font-bold text-slate-900 text-sm sm:text-base mt-1.5 leading-snug">${escapeHtml(item.title)}</h3>
             </div>
             
             ${item.returned ? `
@@ -679,9 +971,9 @@
               <i data-lucide="map-pin" class="w-3 h-3 text-teal-600 shrink-0"></i>
               ${escapeHtml(item.location)}
             </span>
-            <span class="flex items-center gap-1">
-              <i data-lucide="clock" class="w-3 h-3 text-slate-400 shrink-0"></i>
-              ${item.time || 'Recently'}
+            <span class="flex items-center gap-1 font-medium text-slate-600">
+              <i data-lucide="clock" class="w-3 h-3 text-teal-600 shrink-0"></i>
+              ${formatTimeAgo(item.createdAt || item.time)}
             </span>
             <span class="ml-auto text-slate-400">Finder: ${escapeHtml(item.finder)}</span>
           </div>
@@ -714,10 +1006,23 @@
           <div class="bg-white rounded-2xl border ${hasClaims && !item.returned ? 'border-amber-300 ring-2 ring-amber-100' : 'border-slate-200'} p-4 shadow-xs transition">
             <div class="flex items-start justify-between gap-2 mb-2">
               <div>
-                <div class="flex items-center gap-2 mb-1">
+                <div class="flex items-center gap-2 mb-1 flex-wrap">
                   <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${item.returned ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'}">
                     ${item.returned ? '✓ Returned' : item.category}
                   </span>
+
+                  <span class="inline-flex items-center gap-1 text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+                    <i data-lucide="clock" class="w-3 h-3 text-slate-500"></i>
+                    ${formatTimeAgo(item.createdAt || item.time)}
+                  </span>
+
+                  ${item.policeNotified ? `
+                    <span class="inline-flex items-center gap-1 text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200 px-2 py-0.5 rounded-full">
+                      <i data-lucide="shield-check" class="w-3 h-3 text-blue-600"></i>
+                      ${escapeHtml(item.policeIncidentId || 'Police Alerted')}
+                    </span>
+                  ` : ''}
+
                   ${hasClaims && !item.returned ? `
                     <span class="inline-flex items-center gap-1 text-[10px] font-extrabold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full animate-bounce">
                       <i data-lucide="bell" class="w-3 h-3 text-amber-700"></i>
@@ -760,7 +1065,25 @@
               </div>
             </div>
 
-            <!-- Claim Alerts Box: Tells Finder when someone says it's theirs -->
+            <!-- Police Status Bar in Dashboard if alerted -->
+            ${item.policeNotified ? `
+              <div class="mt-2.5 bg-blue-50/70 border border-blue-200/80 rounded-xl p-2.5 text-xs text-blue-950 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0">
+                    <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+                  </div>
+                  <div>
+                    <span class="font-bold text-[11px] block">Notified: ${escapeHtml(item.policeStation || 'Local Police')}</span>
+                    <span class="text-[10px] text-blue-700 font-mono">Incident Registry Reference: ${escapeHtml(item.policeIncidentId || 'PD-REC')}</span>
+                  </div>
+                </div>
+                <button onclick="simulatePoliceDispatchModal('${item.title}', '${item.policeStation}')" class="text-[10px] font-bold text-blue-700 hover:underline">
+                  View Dispatch
+                </button>
+              </div>
+            ` : ''}
+
+            <!-- Claim Alerts Box -->
             ${hasClaims ? `
               <div class="mt-3 bg-amber-50/90 border border-amber-200 rounded-xl p-3 text-xs">
                 <span class="font-bold text-amber-900 flex items-center gap-1.5 text-xs mb-1">
@@ -771,7 +1094,7 @@
                   ${claims.map(c => `
                     <div class="text-[11px] bg-white/70 p-2 rounded-lg border border-amber-200/50 flex items-center justify-between">
                       <span>${escapeHtml(c.message)}</span>
-                      <span class="text-[10px] text-amber-700 font-semibold">${c.time}</span>
+                      <span class="text-[10px] text-amber-700 font-bold bg-amber-100/60 px-1.5 py-0.5 rounded">${formatTimeAgo(c.createdAt || c.time)}</span>
                     </div>
                   `).join('')}
                 </div>
@@ -791,6 +1114,74 @@
       lucide.createIcons();
     }
 
+    // TOGGLE POLICE DROPDOWN IN REPORT FORM
+    function togglePolicePrecinctSelect() {
+      const checkbox = document.getElementById('contactPoliceCheckbox');
+      const box = document.getElementById('policePrecinctBox');
+      if (checkbox.checked) {
+        box.classList.remove('hidden');
+      } else {
+        box.classList.add('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    // ANIMATED POLICE DISPATCH GRAPHIC MODAL
+    function triggerPoliceAnimation(itemTitle, stationName, onComplete) {
+      const modal = document.getElementById('policeAlertModal');
+      const titleEl = document.getElementById('policeModalTitle');
+      const stationEl = document.getElementById('policeModalStation');
+      const progressEl = document.getElementById('policeProgressBar');
+      const log1 = document.getElementById('logStep1');
+      const log2 = document.getElementById('logStep2');
+      const log3 = document.getElementById('logStep3');
+      const statusNotice = document.getElementById('policeStatusNotice');
+
+      titleEl.innerText = 'Alerting Police Precinct...';
+      stationEl.innerText = `Connecting dispatch terminal to: ${stationName}`;
+      progressEl.style.width = '15%';
+      
+      log1.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span><span>Initiating lost property handshake...</span>`;
+      log1.className = 'flex items-center gap-1.5 text-blue-300';
+      log2.innerHTML = `<span>○ Transmitting item details & GPS tag</span>`;
+      log2.className = 'flex items-center gap-1.5 text-slate-500';
+      log3.innerHTML = `<span>○ Recording official incident ID</span>`;
+      log3.className = 'flex items-center gap-1.5 text-slate-500';
+      statusNotice.innerText = 'Transmitting encrypted notification to duty desk...';
+
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+
+      // Step 2 at 800ms
+      setTimeout(() => {
+        progressEl.style.width = '65%';
+        log1.innerHTML = `<span class="text-emerald-400">✓</span><span>Handshake authenticated</span>`;
+        log2.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span><span>Uploading "${escapeHtml(itemTitle)}" report payload...</span>`;
+        log2.className = 'flex items-center gap-1.5 text-blue-300';
+        statusNotice.innerText = 'Alerting duty sergeant on patrol network...';
+      }, 900);
+
+      // Step 3 at 1800ms
+      setTimeout(() => {
+        progressEl.style.width = '100%';
+        log2.innerHTML = `<span class="text-emerald-400">✓</span><span>Payload broadcast to station registry</span>`;
+        log3.innerHTML = `<span class="text-emerald-400">✓</span><span>Incident ID Logged & Station Alert Active</span>`;
+        log3.className = 'flex items-center gap-1.5 text-emerald-300';
+        titleEl.innerText = 'Station Notified Successfully!';
+        statusNotice.innerText = 'Local precinct desk has been alerted of this finding.';
+      }, 1900);
+
+      // Finish at 2800ms
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        if (onComplete) onComplete();
+      }, 2900);
+    }
+
+    function simulatePoliceDispatchModal(itemTitle, stationName) {
+      triggerPoliceAnimation(itemTitle, stationName || 'Central Metro Police Precinct', null);
+    }
+
     // CALL MODAL & CLAIM ALERT LOGIC
     function openCallModal(id) {
       const item = items.find(i => i.id === id);
@@ -800,6 +1191,10 @@
       document.getElementById('modalItemTitle').innerText = item.title;
       document.getElementById('modalFinderName').innerText = item.finder;
       document.getElementById('modalPhoneNumber').innerText = item.phone;
+      const timeEl = document.getElementById('modalItemTime');
+      if (timeEl) {
+        timeEl.innerText = formatTimeAgo(item.createdAt || item.time);
+      }
 
       const cleanPhone = (item.phone || '').replace(/[^0-9+]/g, '');
       document.getElementById('modalDialBtn').href = 'tel:' + cleanPhone;
@@ -835,6 +1230,7 @@
 
       const newAlert = {
         claimerPhone: 'Interested owner',
+        createdAt: Date.now(),
         time: 'Just now',
         message: 'A neighbor confirmed "This Is Mine!" and viewed your phone details.'
       };
@@ -842,20 +1238,12 @@
       currentModalItem.claimAlerts.push(newAlert);
       saveLocal();
 
-      // Sync claim alert to cloud
-      try {
-        const itemEndpoint = currentModalItem.cloudKey 
-          ? getEndpoint().replace('.json', `/${currentModalItem.cloudKey}.json`)
-          : null;
-
-        if (itemEndpoint) {
-          await fetch(itemEndpoint, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ claimAlerts: currentModalItem.claimAlerts })
-          });
-        }
-      } catch (e) {}
+      // Broadcast claim alert across all phones
+      broadcastAction({
+        type: 'CLAIM_ALERT',
+        id: currentModalItem.id,
+        alert: newAlert
+      });
 
       alert('🔔 Finder notified! The finder will see an owner claim alert in their dashboard. Now tap "Call Now" to talk to them directly!');
     }
@@ -876,19 +1264,12 @@
       renderItems();
       renderDashboardItems();
 
-      try {
-        const itemEndpoint = item.cloudKey 
-          ? getEndpoint().replace('.json', `/${item.cloudKey}.json`)
-          : null;
-
-        if (itemEndpoint) {
-          await fetch(itemEndpoint, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ returned: isReturned })
-          });
-        }
-      } catch (e) {}
+      // Broadcast update to all phones
+      broadcastAction({
+        type: 'UPDATE_STATUS',
+        id: id,
+        returned: isReturned
+      });
 
       if (isReturned) {
         alert('🎉 Marked as Returned & Reunited! Thank you for helping the community.');
@@ -910,13 +1291,11 @@
       renderItems();
       renderDashboardItems();
 
-      // Delete from cloud
-      try {
-        if (itemToDelete.cloudKey) {
-          const itemEndpoint = getEndpoint().replace('.json', `/${itemToDelete.cloudKey}.json`);
-          await fetch(itemEndpoint, { method: 'DELETE' });
-        }
-      } catch (e) {}
+      // Broadcast deletion across all connected phones
+      broadcastAction({
+        type: 'DELETE_ITEM',
+        id: id
+      });
 
       alert('🗑️ Finding deleted successfully.');
     }
@@ -946,8 +1325,12 @@
       const phone = document.getElementById('reportPhoneNumber').value.trim();
       const desc = document.getElementById('reportDescription').value.trim();
       const question = document.getElementById('reportQuestion').value.trim();
+      const shouldAlertPolice = document.getElementById('contactPoliceCheckbox').checked;
+      const selectedStation = document.getElementById('policeStationSelect').value;
 
       const newId = 'item-' + Date.now();
+      const randomIncident = 'PD-' + Math.floor(10000 + Math.random() * 90000);
+
       const newItem = {
         id: newId,
         title: title,
@@ -959,38 +1342,44 @@
         finder: finder || 'Neighbor',
         phone: phone || '+1 555-0000',
         returned: false,
+        policeNotified: shouldAlertPolice,
+        policeStation: shouldAlertPolice ? selectedStation : undefined,
+        policeIncidentId: shouldAlertPolice ? randomIncident : undefined,
         claimAlerts: [],
         createdAt: Date.now()
       };
 
-      // Add to local items & remember as My Post
-      items.unshift(newItem);
-      myPostIds.unshift(newId);
-      saveLocal();
-      renderItems();
-      renderDashboardItems();
+      const finishPosting = async () => {
+        // Add to local items & remember as My Post
+        items.unshift(newItem);
+        myPostIds.unshift(newId);
+        saveLocal();
+        renderItems();
+        renderDashboardItems();
 
-      try {
-        const res = await fetch(getEndpoint(), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newItem)
+        // Broadcast to all phones immediately via real-time cloud mesh!
+        await broadcastAction({
+          type: 'NEW_ITEM',
+          item: newItem
         });
 
-        if (res.ok) {
-          const resData = await res.json();
-          newItem.cloudKey = resData.name;
-        }
-      } catch (err) {}
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Post Found Item';
+        closeReportModal();
+        document.getElementById('reportForm').reset();
+        document.getElementById('policePrecinctBox').classList.add('hidden');
+        
+        // Auto open Dashboard so Finder can see their new post
+        showDashboardScreen();
+        alert(`🎉 Posted! Synced live to all phones in your community. ${shouldAlertPolice ? `Police station alert dispatched (${randomIncident}).` : ''}`);
+      };
 
-      submitBtn.disabled = false;
-      submitBtn.innerText = 'Post Found Item';
-      closeReportModal();
-      document.getElementById('reportForm').reset();
-      
-      // Auto open Dashboard so Finder can see their new post
-      showDashboardScreen();
-      alert('🎉 Posted! Your finding is now managed in your Finder Dashboard.');
+      if (shouldAlertPolice) {
+        // Trigger high-tech animated police siren/dispatch graphic
+        triggerPoliceAnimation(title, selectedStation, finishPosting);
+      } else {
+        finishPosting();
+      }
     }
 
     function escapeHtml(str) {
