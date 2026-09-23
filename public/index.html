@@ -39,25 +39,66 @@
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased">
 
-  <!-- TOP HEADER BAR (Clean, spacious, modern) -->
+  <!-- TOP HEADER BAR (Clean, spacious, modern with responsive PC nav) -->
   <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80">
-    <div class="max-w-xl mx-auto px-4 h-14 flex items-center justify-between">
-      <div class="flex items-center gap-2.5 cursor-pointer" onclick="showHomeScreen()">
-        <div class="w-8 h-8 rounded-xl bg-teal-600 flex items-center justify-center text-white font-bold text-sm shadow-xs">
-          <i data-lucide="compass" class="w-4 h-4"></i>
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2.5 cursor-pointer" onclick="showHomeScreen()">
+          <div class="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center text-white font-bold text-sm shadow-xs hover:scale-105 transition">
+            <i data-lucide="compass" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <span class="text-lg font-extrabold text-slate-900 tracking-tight">FoundIt</span>
+            <span class="hidden sm:inline-block ml-1.5 text-[11px] font-semibold text-teal-800 bg-teal-50 border border-teal-200/70 px-2 py-0.5 rounded-md">Neighborhood</span>
+          </div>
         </div>
-        <div>
-          <span class="text-base font-extrabold text-slate-900 tracking-tight">FoundIt</span>
-        </div>
+
+        <!-- PC Desktop Top Navigation Links -->
+        <nav class="hidden md:flex items-center gap-1">
+          <button 
+            onclick="showHomeScreen()" 
+            id="nav-link-home"
+            class="px-3.5 py-2 rounded-xl text-xs font-bold text-teal-700 bg-teal-50 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <i data-lucide="home" class="w-4 h-4"></i>
+            <span>Home</span>
+          </button>
+          <button 
+            onclick="showSearcherScreen()" 
+            id="nav-link-browse"
+            class="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <i data-lucide="search" class="w-4 h-4"></i>
+            <span>Browse Findings</span>
+          </button>
+          <button 
+            onclick="showDashboardScreen()" 
+            id="nav-link-dashboard"
+            class="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5 relative cursor-pointer"
+          >
+            <i data-lucide="folder" class="w-4 h-4"></i>
+            <span>My Postings</span>
+            <span id="navLinkBadge" class="hidden w-2 h-2 rounded-full bg-amber-500"></span>
+          </button>
+        </nav>
       </div>
 
-      <!-- Right Actions: Live dot & Dashboard link -->
-      <div class="flex items-center gap-2">
+      <!-- Right Actions: Post Finding, Live Sync, Presentation QR, Dashboard -->
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        <!-- Prominent "Post Found" button on PC -->
+        <button 
+          onclick="openReportModal()"
+          class="hidden sm:inline-flex items-center gap-1.5 bg-teal-600 hover:bg-teal-700 active:scale-95 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer"
+        >
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Report Found Item</span>
+        </button>
+
         <button 
           onclick="syncNow(true)" 
           id="syncBadge" 
           title="Synced across community devices"
-          class="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200 transition"
+          class="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-2.5 py-1.5 rounded-full border border-slate-200 transition cursor-pointer"
         >
           <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span id="syncLabel">Live</span>
@@ -67,16 +108,16 @@
         <button 
           onclick="openShareModal()" 
           title="Show Presentation QR Code"
-          class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200/80 px-2.5 py-1.5 rounded-xl transition cursor-pointer"
+          class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200/80 px-3 py-1.5 rounded-xl transition cursor-pointer"
         >
-          <i data-lucide="qr-code" class="w-3.5 h-3.5 text-teal-600"></i>
-          <span class="hidden sm:inline">Share QR</span>
+          <i data-lucide="qr-code" class="w-4 h-4 text-teal-600"></i>
+          <span class="font-bold">Share QR</span>
         </button>
 
         <button 
           onclick="showDashboardScreen()"
           id="headerDashboardBtn"
-          class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-teal-700 bg-slate-100 hover:bg-teal-50 px-3 py-1.5 rounded-xl transition"
+          class="md:hidden inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-teal-700 bg-slate-100 hover:bg-teal-50 px-3 py-1.5 rounded-xl transition"
         >
           <i data-lucide="folder" class="w-3.5 h-3.5 text-teal-600"></i>
           <span>My Posts</span>
@@ -86,224 +127,239 @@
     </div>
   </header>
 
-  <!-- MAIN APP CONTAINER -->
-  <main class="flex-1 max-w-xl w-full mx-auto px-4 py-5 pb-12 flex flex-col justify-center">
+  <!-- MAIN APP CONTAINER (Optimized: max-w-xl on phone, up to max-w-5xl on tablet/PC) -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 pb-20 md:pb-12 flex flex-col justify-start">
 
     <!-- SCREEN 1: MAIN MENU (FOUND & LOST CARDS) -->
-    <section id="screen-home" class="space-y-5">
+    <section id="screen-home" class="space-y-6 max-w-3xl mx-auto w-full my-auto">
       
       <!-- Welcome Header -->
-      <div class="text-center pt-1">
-        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-teal-800 bg-teal-50 border border-teal-200/80 px-3 py-1 rounded-full mb-3">
+      <div class="text-center pt-2 sm:pt-4">
+        <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-800 bg-teal-50 border border-teal-200/80 px-3.5 py-1.5 rounded-full mb-3 shadow-2xs">
           <i data-lucide="map-pin" class="w-3.5 h-3.5 text-teal-600"></i>
-          Neighborhood Lost & Found
+          Neighborhood Lost & Found Network
         </span>
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
           What would you like to do?
         </h1>
-        <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-xs mx-auto">
-          Connect directly with neighbors to recover or return lost belongings.
+        <p class="text-sm sm:text-base text-slate-500 mt-2 max-w-md mx-auto">
+          Connect directly with neighbors to recover or return lost belongings with instant community sync.
         </p>
       </div>
 
-      <!-- 2 MAIN ROLE CARDS -->
-      <div class="grid grid-cols-1 gap-4">
+      <!-- 2 MAIN ROLE CARDS (Side by side on PC/tablet, stacked on mobile) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
 
         <!-- OPTION 1: I FOUND AN ITEM -->
         <button 
           onclick="openReportModal()"
-          class="w-full text-left bg-gradient-to-br from-teal-700 via-teal-600 to-teal-700 text-white rounded-3xl p-6 shadow-lg shadow-teal-900/10 hover:shadow-xl transition active:scale-[0.99] relative overflow-hidden group border border-teal-500/30 cursor-pointer"
+          class="w-full text-left bg-gradient-to-br from-teal-700 via-teal-600 to-teal-700 text-white rounded-3xl p-6 sm:p-7 shadow-lg shadow-teal-900/10 hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-200 active:scale-[0.99] relative overflow-hidden group border border-teal-500/30 cursor-pointer flex flex-col justify-between"
         >
-          <div class="flex items-start justify-between mb-3.5">
-            <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
-              <i data-lucide="plus-circle" class="w-6 h-6"></i>
+          <div>
+            <div class="flex items-start justify-between mb-4">
+              <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner">
+                <i data-lucide="plus-circle" class="w-7 h-7"></i>
+              </div>
+              <span class="text-xs font-black bg-white text-teal-800 px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                Finder
+              </span>
             </div>
-            <span class="text-[11px] font-extrabold bg-white text-teal-800 px-3 py-0.5 rounded-full uppercase tracking-wider shadow-2xs">
-              Finder
-            </span>
+
+            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 text-white">
+              I Found an Item
+            </h2>
+            <p class="text-xs sm:text-sm text-teal-100 font-normal leading-relaxed">
+              Report what you picked up so the rightful owner can contact you and verify ownership before handover.
+            </p>
           </div>
 
-          <h2 class="text-xl sm:text-2xl font-bold tracking-tight mb-1 text-white">
-            I Found an Item
-          </h2>
-          <p class="text-xs sm:text-sm text-teal-100 font-normal leading-relaxed max-w-sm">
-            Report what you picked up so the owner can contact you and verify ownership.
-          </p>
-
-          <div class="mt-4 flex items-center gap-1.5 text-xs font-bold text-teal-100 group-hover:text-white transition">
+          <div class="mt-6 flex items-center gap-2 text-xs sm:text-sm font-bold text-teal-100 group-hover:text-white transition">
             <span>Post finding & notify police</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition"></i>
+            <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1.5 transition"></i>
           </div>
 
-          <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-lg pointer-events-none"></div>
+          <div class="absolute -right-6 -bottom-6 w-36 h-36 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
         </button>
 
         <!-- OPTION 2: I LOST AN ITEM -->
         <button 
           onclick="showSearcherScreen()"
-          class="w-full text-left bg-white text-slate-900 rounded-3xl p-6 border-2 border-slate-200 hover:border-teal-600 shadow-sm hover:shadow-md transition active:scale-[0.99] relative overflow-hidden group cursor-pointer"
+          class="w-full text-left bg-white text-slate-900 rounded-3xl p-6 sm:p-7 border-2 border-slate-200 hover:border-teal-600 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 active:scale-[0.99] relative overflow-hidden group cursor-pointer flex flex-col justify-between"
         >
-          <div class="flex items-start justify-between mb-3.5">
-            <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center">
-              <i data-lucide="search" class="w-6 h-6"></i>
+          <div>
+            <div class="flex items-start justify-between mb-4">
+              <div class="w-14 h-14 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center shadow-inner">
+                <i data-lucide="search" class="w-7 h-7"></i>
+              </div>
+              <span class="text-xs font-black bg-slate-100 text-slate-700 px-3 py-1 rounded-full uppercase tracking-wider">
+                Searcher
+              </span>
             </div>
-            <span class="text-[11px] font-extrabold bg-slate-100 text-slate-700 px-3 py-0.5 rounded-full uppercase tracking-wider">
-              Searcher
-            </span>
+
+            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 text-slate-900">
+              I Lost an Item
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 font-normal leading-relaxed">
+              Search recent findings in your area, answer verification questions, and call finders directly.
+            </p>
           </div>
 
-          <h2 class="text-xl sm:text-2xl font-bold tracking-tight mb-1 text-slate-900">
-            I Lost an Item
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-500 font-normal leading-relaxed max-w-sm">
-            Search recent findings in your area, answer verification questions, and call finders.
-          </p>
-
-          <div class="mt-4 flex items-center gap-1.5 text-xs font-bold text-teal-700 group-hover:text-teal-800 transition">
+          <div class="mt-6 flex items-center gap-2 text-xs sm:text-sm font-bold text-teal-700 group-hover:text-teal-800 transition">
             <span>Search findings & call finders</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition"></i>
+            <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1.5 transition"></i>
           </div>
         </button>
 
       </div>
 
       <!-- Quick Finder Dashboard Link Card -->
-      <div class="text-center pt-1">
+      <div class="text-center pt-2 flex items-center justify-center gap-3 flex-wrap">
         <button 
           onclick="showDashboardScreen()" 
-          class="inline-flex items-center gap-2 text-xs font-bold text-slate-600 bg-white hover:bg-slate-100 px-4 py-2.5 rounded-2xl border border-slate-200 shadow-2xs transition active:scale-95 cursor-pointer"
+          class="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-700 bg-white hover:bg-slate-100 px-5 py-3 rounded-2xl border border-slate-200 shadow-2xs hover:shadow-sm transition active:scale-95 cursor-pointer"
         >
           <i data-lucide="layout-dashboard" class="w-4 h-4 text-teal-600"></i>
           <span>Open Finder Dashboard (<span id="homeMyPostsCount">0</span> items)</span>
         </button>
+
+        <button 
+          onclick="openShareModal()" 
+          class="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 px-4 py-3 rounded-2xl border border-teal-200/80 transition active:scale-95 cursor-pointer"
+        >
+          <i data-lucide="presentation" class="w-4 h-4 text-teal-600"></i>
+          <span>Presentation QR Code</span>
+        </button>
       </div>
 
-      <div class="text-center text-[11px] text-slate-400">
+      <div class="text-center text-xs text-slate-400">
         <span id="homeCountText">Synced live across community devices</span>
       </div>
 
     </section>
 
-    <!-- SCREEN 2: BROWSE & SEARCH FINDINGS FEED -->
-    <section id="screen-searcher" class="hidden space-y-3.5">
+    <!-- SCREEN 2: BROWSE & SEARCH FINDINGS FEED (Responsive grid on PC) -->
+    <section id="screen-searcher" class="hidden space-y-4 max-w-4xl mx-auto w-full">
       
       <!-- Top Navigation Row -->
       <div class="flex items-center justify-between">
         <button 
           onclick="showHomeScreen()" 
-          class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 transition cursor-pointer"
+          class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 transition cursor-pointer"
         >
           <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          <span>Main Menu</span>
+          <span>Back to Home Menu</span>
         </button>
 
         <button 
           onclick="openReportModal()"
-          class="text-xs font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-xl transition flex items-center gap-1 cursor-pointer"
+          class="text-xs sm:text-sm font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 px-4 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-teal-200/70 shadow-2xs"
         >
-          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-          <span>Report Found</span>
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Report Found Item</span>
         </button>
       </div>
 
-      <!-- Clean Search Input -->
+      <!-- Clean Search Input (Enhanced for Desktop) -->
       <div class="relative">
-        <i data-lucide="search" class="absolute left-3.5 top-3 w-4 h-4 text-slate-400"></i>
+        <i data-lucide="search" class="absolute left-4 top-3.5 w-5 h-5 text-slate-400"></i>
         <input 
           type="text" 
           id="searchInput" 
           oninput="renderItems()" 
-          placeholder="Search items, brands, or places..." 
-          class="w-full bg-white pl-10 pr-4 py-2.5 rounded-2xl border border-slate-200 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-2xs"
+          placeholder="Search items, brands, colors, or locations (e.g. 'AirPods', 'Metro', 'Keys')..." 
+          class="w-full bg-white pl-12 pr-4 py-3 rounded-2xl border border-slate-200 text-sm sm:text-base placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-2xs"
         />
       </div>
 
       <!-- Category Filter Pills -->
-      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none" id="categoryContainer">
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none" id="categoryContainer">
         <!-- Rendered dynamically -->
       </div>
 
       <!-- Feed Header -->
-      <div class="flex items-center justify-between px-0.5 text-xs text-slate-500">
-        <span id="itemsCount" class="font-medium">Recent Findings</span>
-        <span class="text-teal-700 font-medium">Tap Call to reach finder</span>
+      <div class="flex items-center justify-between px-1 text-xs sm:text-sm text-slate-500 pt-1">
+        <span id="itemsCount" class="font-bold text-slate-700">Recent Findings</span>
+        <span class="text-teal-700 font-semibold flex items-center gap-1">
+          <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+          Tap Call to reach finder directly
+        </span>
       </div>
 
-      <!-- Clean Item Cards Feed -->
-      <div id="itemsList" class="space-y-2.5">
+      <!-- Clean Item Cards Feed (Responsive 2-column grid on desktop, single column on phone) -->
+      <div id="itemsList" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
         <!-- Injected by JavaScript -->
       </div>
 
       <!-- Empty State -->
-      <div id="emptyState" class="hidden text-center py-12 bg-white rounded-2xl border border-slate-200 p-6">
-        <div class="w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-2.5">
-          <i data-lucide="inbox" class="w-5 h-5"></i>
+      <div id="emptyState" class="hidden text-center py-16 bg-white rounded-3xl border border-slate-200 p-8 shadow-xs">
+        <div class="w-12 h-12 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="inbox" class="w-6 h-6"></i>
         </div>
-        <p class="text-sm font-semibold text-slate-700">No matching items found</p>
-        <p class="text-xs text-slate-400 mt-0.5">Try searching with a broader keyword</p>
-        <button onclick="resetFilters()" class="mt-3 text-xs text-teal-600 font-bold hover:underline cursor-pointer">
-          Clear filters
+        <p class="text-base font-bold text-slate-800">No matching items found</p>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-sm mx-auto">Try searching with a broader keyword, checking another category, or reporting what you found.</p>
+        <button onclick="resetFilters()" class="mt-4 text-xs sm:text-sm text-teal-600 font-bold hover:underline cursor-pointer">
+          Clear all filters
         </button>
       </div>
 
     </section>
 
     <!-- SCREEN 3: MY POSTS / FINDER DASHBOARD -->
-    <section id="screen-dashboard" class="hidden space-y-4">
+    <section id="screen-dashboard" class="hidden space-y-5 max-w-4xl mx-auto w-full">
       
       <!-- Top Header & Action Row -->
       <div class="flex items-center justify-between">
         <button 
           onclick="showHomeScreen()" 
-          class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 transition cursor-pointer"
+          class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 transition cursor-pointer"
         >
           <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          <span>Main Menu</span>
+          <span>Back to Home Menu</span>
         </button>
 
         <button 
           onclick="openReportModal()" 
-          class="text-xs font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-xl transition flex items-center gap-1 cursor-pointer"
+          class="text-xs sm:text-sm font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 px-4 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-teal-200/70 shadow-2xs"
         >
-          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-          <span>Add Finding</span>
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Add New Finding</span>
         </button>
       </div>
 
-      <!-- Dashboard 3-Metric Summary Strip -->
-      <div class="grid grid-cols-3 gap-2 text-center">
-        <div class="bg-white border border-slate-200/80 p-2.5 rounded-2xl shadow-2xs">
-          <span class="block text-base font-black text-slate-900" id="dashTotalCount">0</span>
-          <span class="text-[10px] font-bold text-slate-400 uppercase">My Items</span>
+      <!-- Dashboard 3-Metric Summary Strip (Full width cards on PC) -->
+      <div class="grid grid-cols-3 gap-3 text-center">
+        <div class="bg-white border border-slate-200/80 p-4 rounded-2xl shadow-2xs hover:shadow-xs transition">
+          <span class="block text-xl sm:text-2xl font-black text-slate-900" id="dashTotalCount">0</span>
+          <span class="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wide">My Items</span>
         </div>
-        <div class="bg-white border border-slate-200/80 p-2.5 rounded-2xl shadow-2xs">
-          <span class="block text-base font-black text-amber-600" id="dashClaimsCount">0</span>
-          <span class="text-[10px] font-bold text-amber-700 uppercase">Claims</span>
+        <div class="bg-white border border-slate-200/80 p-4 rounded-2xl shadow-2xs hover:shadow-xs transition">
+          <span class="block text-xl sm:text-2xl font-black text-amber-600" id="dashClaimsCount">0</span>
+          <span class="text-[11px] sm:text-xs font-bold text-amber-700 uppercase tracking-wide">Claims</span>
         </div>
-        <div class="bg-white border border-slate-200/80 p-2.5 rounded-2xl shadow-2xs">
-          <span class="block text-base font-black text-emerald-600" id="dashReturnedCount">0</span>
-          <span class="text-[10px] font-bold text-emerald-700 uppercase">Returned</span>
+        <div class="bg-white border border-slate-200/80 p-4 rounded-2xl shadow-2xs hover:shadow-xs transition">
+          <span class="block text-xl sm:text-2xl font-black text-emerald-600" id="dashReturnedCount">0</span>
+          <span class="text-[11px] sm:text-xs font-bold text-emerald-700 uppercase tracking-wide">Returned</span>
         </div>
       </div>
 
-      <!-- Dashboard Items List -->
-      <div class="space-y-2.5 pt-1">
+      <!-- Dashboard Items List (Responsive 2-column grid on desktop) -->
+      <div class="space-y-3 pt-1">
         <div class="flex items-center justify-between px-1">
-          <h3 class="font-bold text-xs uppercase tracking-wider text-slate-400">Your Postings</h3>
-          <span class="text-xs text-slate-400">Live on Cloud</span>
+          <h3 class="font-bold text-xs sm:text-sm uppercase tracking-wider text-slate-400">Your Postings</h3>
+          <span class="text-xs text-slate-400">Live on Community Cloud</span>
         </div>
 
-        <div id="dashboardItemsList" class="space-y-2.5">
+        <div id="dashboardItemsList" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           <!-- Rendered by JS -->
         </div>
 
-        <div id="dashboardEmptyState" class="hidden text-center py-10 bg-white rounded-3xl border border-dashed border-slate-200 p-6">
-          <div class="w-10 h-10 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-2">
-            <i data-lucide="package-open" class="w-5 h-5"></i>
+        <div id="dashboardEmptyState" class="hidden text-center py-14 bg-white rounded-3xl border border-dashed border-slate-200 p-8">
+          <div class="w-12 h-12 bg-teal-50 text-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <i data-lucide="package-open" class="w-6 h-6"></i>
           </div>
-          <h4 class="font-bold text-slate-800 text-sm">No items posted yet</h4>
-          <p class="text-xs text-slate-400 mt-0.5 mb-4 max-w-xs mx-auto">When you report found items, they'll show up here with any owner claim alerts.</p>
-          <button onclick="openReportModal()" class="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition active:scale-95 cursor-pointer">
+          <h4 class="font-bold text-slate-800 text-base">No items posted yet</h4>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1 mb-5 max-w-sm mx-auto">When you report found items, they'll show up here with real-time owner claim alerts so you can return them safely.</p>
+          <button onclick="openReportModal()" class="bg-teal-600 hover:bg-teal-700 text-white text-xs sm:text-sm font-bold px-5 py-2.5 rounded-xl shadow-xs transition active:scale-95 cursor-pointer">
             Post Your First Found Item
           </button>
         </div>
@@ -313,8 +369,8 @@
 
   </main>
 
-  <!-- BOTTOM NAVIGATION BAR -->
-  <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 z-30">
+  <!-- BOTTOM NAVIGATION BAR (Visible on mobile screens, hidden on md+ desktop) -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 z-30">
     <div class="max-w-xl mx-auto px-6 h-14 flex items-center justify-around">
       <!-- Home tab -->
       <button 
@@ -954,9 +1010,15 @@
 
     // NAVIGATION & TAB STATE
     function updateTabStyles(activeTab) {
+      // Mobile bottom nav tabs
       const tabHome = document.getElementById('tab-home');
       const tabBrowse = document.getElementById('tab-browse');
       const tabDashboard = document.getElementById('tab-dashboard');
+
+      // Desktop top nav buttons
+      const navHome = document.getElementById('nav-link-home');
+      const navBrowse = document.getElementById('nav-link-browse');
+      const navDashboard = document.getElementById('nav-link-dashboard');
 
       const inactiveClass = 'flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700 transition relative cursor-pointer';
       const activeClass = 'flex flex-col items-center gap-0.5 text-teal-600 font-bold transition relative cursor-pointer';
@@ -964,6 +1026,14 @@
       if (tabHome) tabHome.className = activeTab === 'home' ? activeClass : inactiveClass;
       if (tabBrowse) tabBrowse.className = activeTab === 'searcher' ? activeClass : inactiveClass;
       if (tabDashboard) tabDashboard.className = activeTab === 'dashboard' ? activeClass : inactiveClass;
+
+      // Desktop link styles
+      const desktopActive = 'px-3.5 py-2 rounded-xl text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200/60 transition flex items-center gap-1.5 cursor-pointer';
+      const desktopInactive = 'px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5 cursor-pointer';
+
+      if (navHome) navHome.className = activeTab === 'home' ? desktopActive : desktopInactive;
+      if (navBrowse) navBrowse.className = activeTab === 'searcher' ? desktopActive : desktopInactive;
+      if (navDashboard) navDashboard.className = activeTab === 'dashboard' ? desktopActive : desktopInactive;
     }
 
     function showHomeScreen() {
@@ -1033,13 +1103,19 @@
       const claimsEl = document.getElementById('dashClaimsCount');
       const returnedEl = document.getElementById('dashReturnedCount');
       const bottomNavBadge = document.getElementById('bottomNavBadge');
+      const navLinkBadge = document.getElementById('navLinkBadge');
+      const homeMyPostsCount = document.getElementById('homeMyPostsCount');
 
       if (totalEl) totalEl.innerText = myItems.length;
       if (claimsEl) claimsEl.innerText = myClaims;
       if (returnedEl) returnedEl.innerText = myReturned;
+      if (homeMyPostsCount) homeMyPostsCount.innerText = myItems.length;
 
       if (bottomNavBadge) {
         bottomNavBadge.classList.toggle('hidden', myClaims === 0);
+      }
+      if (navLinkBadge) {
+        navLinkBadge.classList.toggle('hidden', myClaims === 0);
       }
     }
 
@@ -1552,6 +1628,10 @@
         urlDisplay.innerText = shareUrl;
       }
 
+      // Responsive QR dimension (larger on PC presentation displays)
+      const isPc = window.innerWidth >= 640;
+      const qrSize = isPc ? 250 : 210;
+
       // Generate or refresh Big QR Code
       if (container) {
         container.innerHTML = '';
@@ -1559,8 +1639,8 @@
           if (typeof QRCode !== 'undefined') {
             qrCodeInstance = new QRCode(container, {
               text: shareUrl,
-              width: 220,
-              height: 220,
+              width: qrSize,
+              height: qrSize,
               colorDark: '#0f172a',
               colorLight: '#ffffff',
               correctLevel: QRCode.CorrectLevel.M
@@ -1568,17 +1648,17 @@
           } else {
             // Fallback via high-resolution QR image API if CDN was blocked
             const qrImg = document.createElement('img');
-            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(shareUrl)}`;
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(shareUrl)}`;
             qrImg.alt = 'Scan QR Code';
-            qrImg.className = 'w-[220px] h-[220px] rounded-xl shadow-xs';
+            qrImg.className = `w-[${qrSize}px] h-[${qrSize}px] rounded-xl shadow-xs`;
             container.appendChild(qrImg);
           }
         } catch (e) {
           // Backup standard image QR generator
           const qrImg = document.createElement('img');
-          qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(shareUrl)}`;
+          qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(shareUrl)}`;
           qrImg.alt = 'Scan QR Code';
-          qrImg.className = 'w-[220px] h-[220px] rounded-xl shadow-xs';
+          qrImg.className = `w-[${qrSize}px] h-[${qrSize}px] rounded-xl shadow-xs`;
           container.appendChild(qrImg);
         }
       }
@@ -1593,6 +1673,15 @@
       if (modal) modal.classList.add('hidden');
       document.body.style.overflow = '';
     }
+
+    // Close modal on Escape key press (PC friendly)
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeShareModal();
+        closeCallModal();
+        closeReportModal();
+      }
+    });
 
     // Close share modal if user clicks outside of dialog
     window.addEventListener('click', (e) => {
